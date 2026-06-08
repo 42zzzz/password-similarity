@@ -121,5 +121,57 @@ class TestBloomFilterWithRealData(unittest.TestCase):
         self.assertLess(rate, 0.01, f'Empirical FP rate {rate:.4f} >= 0.01')
 
 
+class TestBloomFilterSerialization(unittest.TestCase):
+
+    def setUp(self):
+        self.tmpfile = os.path.join(os.path.dirname(__file__), '_test_bf.blm')
+
+    def tearDown(self):
+        if os.path.exists(self.tmpfile):
+            os.remove(self.tmpfile)
+
+    def test_save_and_load(self):
+        bf1 = BloomFilter(1024, None)
+        bf1.add('hello')
+        bf1.add('world')
+        bf1.save(self.tmpfile)
+
+        bf2 = BloomFilter.load(self.tmpfile)
+        self.assertEqual(bf2.size, bf1.size)
+        self.assertEqual(bf2.count, bf1.count)
+        self.assertEqual(len(bf2.hash_functions), len(bf1.hash_functions))
+        self.assertTrue(bf2.check('hello'))
+        self.assertTrue(bf2.check('world'))
+        self.assertFalse(bf2.check('absent'))
+
+    def test_save_load_empty(self):
+        bf1 = BloomFilter(1024, None)
+        bf1.save(self.tmpfile)
+        bf2 = BloomFilter.load(self.tmpfile)
+        self.assertEqual(bf2.count, 0)
+        self.assertFalse(bf2.check('anything'))
+
+    def test_save_load_large(self):
+        bf1 = BloomFilter.for_capacity(10000, fp_rate=0.01)
+        for i in range(1000):
+            bf1.add(str(i))
+        bf1.save(self.tmpfile)
+        bf2 = BloomFilter.load(self.tmpfile)
+        self.assertEqual(bf2.count, 1000)
+        for i in range(1000):
+            self.assertTrue(bf2.check(str(i)))
+        self.assertAlmostEqual(bf1.false_positive_rate, bf2.false_positive_rate, delta=0.001)
+
+    def test_save_load_custom_hashes(self):
+        def h1(x):
+            return 0 if x == 'anything' else 1
+        bf1 = BloomFilter(8, hash_functions=[h1])
+        bf1.add('anything')
+        bf1.save(self.tmpfile)
+        bf2 = BloomFilter.load(self.tmpfile, hash_functions=[h1])
+        self.assertTrue(bf2.check('anything'))
+        self.assertFalse(bf2.check('other'))
+
+
 if __name__ == '__main__':
     unittest.main()

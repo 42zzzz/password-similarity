@@ -5,6 +5,7 @@ from bloom.bloom_filter import BloomFilter
 
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'top10k_rockyou.txt')
+CACHE_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'top10k_rockyou.blm')
 
 
 def load_passwords(path):
@@ -25,19 +26,31 @@ def print_stats(bf, total):
     print()
 
 
-def main():
-    if not os.path.exists(DATA_FILE):
-        print(f'Error: {DATA_FILE} not found')
-        return
+def build_or_load():
+    use_cache = os.path.exists(CACHE_FILE) and os.path.getmtime(CACHE_FILE) >= os.path.getmtime(DATA_FILE)
+    if use_cache:
+        bf = BloomFilter.load(CACHE_FILE)
+        total = bf.count
+        return bf, total
 
     passwords = load_passwords(DATA_FILE)
     bf = BloomFilter.for_capacity(len(passwords), fp_rate=0.01)
     for pw in passwords:
         bf.add(pw)
+    bf.save(CACHE_FILE)
+    return bf, len(passwords)
+
+
+def main():
+    if not os.path.exists(DATA_FILE):
+        print(f'Error: {DATA_FILE} not found')
+        return
+
+    bf, total = build_or_load()
 
     print()
     print('=== Bloom Filter Password Checker ===')
-    print_stats(bf, len(passwords))
+    print_stats(bf, total)
 
     while True:
         try:

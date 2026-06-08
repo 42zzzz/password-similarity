@@ -45,6 +45,25 @@ class BloomFilter:
                 return False
         return True
 
+    def save(self, path):
+        k = len(self.hash_functions)
+        with open(path, 'wb') as f:
+            f.write(struct.pack('<III', self.size, k, self.count))
+            f.write(self._bits)
+
+    @classmethod
+    def load(cls, path, hash_functions=None):
+        with open(path, 'rb') as f:
+            size, k, count = struct.unpack('<III', f.read(12))
+            bf = cls.__new__(cls)
+            bf.size = size
+            bf.hash_functions = hash_functions if hash_functions is not None else cls._default_hashes(k)
+            bf._byte_count = (size + 7) // 8
+            bf._bits = bytearray(bf._byte_count)
+            f.readinto(bf._bits)
+            bf.count = count
+            return bf
+
     @property
     def false_positive_rate(self):
         if self.count == 0:
