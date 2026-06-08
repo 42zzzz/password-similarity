@@ -9,3 +9,8 @@ dist/
 build/
 .DS_Store
 Thumbs.db
+
+# Full breach data (use top10k_rockyou.txt instead)
+rockyou.txt
+data/rockyou.txt
+bloom/rockyou.txt
