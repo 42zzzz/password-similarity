@@ -1,13 +1,13 @@
 import math
-import hashlib
 import struct
+
+from hash.hash_functions import create_hashes
 
 
 class BloomFilter:
     def __init__(self, size, hash_functions=None):
         self.size = size
-        #  Hafsa to replace with hash_functions.create_hashes(k)
-        self.hash_functions = hash_functions if hash_functions is not None else self._default_hashes(7)
+        self.hash_functions = hash_functions if hash_functions is not None else create_hashes(7)
         self._byte_count = (size + 7) // 8
         self._bits = bytearray(self._byte_count)
         self.count = 0
@@ -17,21 +17,9 @@ class BloomFilter:
         target = fp_rate * 0.9
         m = int(-expected_items * math.log(target) / (math.log(2) ** 2))
         k = round((m / expected_items) * math.log(2))
-        return cls(m, hash_functions or cls._default_hashes(k))
-
-    @staticmethod
-    def _default_hashes(num):
-        def _make(salt_byte):
-            def h(item):
-                h_obj = hashlib.sha256()
-                h_obj.update(struct.pack('<B', salt_byte))
-                h_obj.update(item.encode('utf-8'))
-                return int.from_bytes(h_obj.digest(), 'big')
-            return h
-        return [_make(i) for i in range(num)]
+        return cls(m, hash_functions or create_hashes(k))
 
     def _indices(self, item):
-        # Hafsa: each hf will be a function from hash_functions.py
         return [hf(item) % self.size for hf in self.hash_functions]
 
     def add(self, item):
@@ -45,19 +33,23 @@ class BloomFilter:
                 return False
         return True
 
+    FORMAT_VERSION = 1
+
     def save(self, path):
         k = len(self.hash_functions)
         with open(path, 'wb') as f:
-            f.write(struct.pack('<III', self.size, k, self.count))
+            f.write(struct.pack('<BIII', self.FORMAT_VERSION, self.size, k, self.count))
             f.write(self._bits)
 
     @classmethod
     def load(cls, path, hash_functions=None):
         with open(path, 'rb') as f:
-            size, k, count = struct.unpack('<III', f.read(12))
+            ver, size, k, count = struct.unpack('<BIII', f.read(13))
+            if ver != cls.FORMAT_VERSION:
+                raise ValueError(f'Unsupported format version {ver}')
             bf = cls.__new__(cls)
             bf.size = size
-            bf.hash_functions = hash_functions if hash_functions is not None else cls._default_hashes(k)
+            bf.hash_functions = hash_functions if hash_functions is not None else create_hashes(k)
             bf._byte_count = (size + 7) // 8
             bf._bits = bytearray(bf._byte_count)
             f.readinto(bf._bits)

@@ -26,6 +26,14 @@ def get_hash_pair(bigram: str) -> tuple:
     return sha256_hash(bigram), md5_hash(bigram)
 
 
+def create_hashes(num):
+    def make(i):
+        def h(item):
+            return sha256_hash(item) + i * md5_hash(item)
+        return h
+    return [make(i) for i in range(num)]
+
+
 def load_passwords(filepath: str) -> list:
     # reads the common passwords dataset and filters by length
     # document says passwords must be between 8 and 10 characters (Section V.b)
