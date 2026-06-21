@@ -6,7 +6,7 @@ import os
 from bloom.bloom_filter import BloomFilter
 
 
-DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'top10k_rockyou.txt')
+DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'rockyou_subset_6.txt')
 
 
 class TestBloomFilterCore(unittest.TestCase):

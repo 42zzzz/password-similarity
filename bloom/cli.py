@@ -4,8 +4,8 @@ import math
 from bloom.bloom_filter import BloomFilter
 
 
-DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'top10k_rockyou.txt')
-CACHE_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'top10k_rockyou.blm')
+DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'rockyou_subset_6.txt')
+CACHE_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'rockyou_subset_6.blm')
 
 
 def load_passwords(path):

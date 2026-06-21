@@ -10,7 +10,7 @@ build/
 .DS_Store
 Thumbs.db
 
-# Full breach data (use top10k_rockyou.txt instead)
-rockyou.txt
-data/rockyou.txt
-bloom/rockyou.txt
+# use rockyou_subset_6.txt
+
+data/rockyou_subset_6.txt
+bloom/rockyou_subset_6.txt

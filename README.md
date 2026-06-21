@@ -46,7 +46,7 @@ integration/
   checker.py               # CLI/REPL wiring everything together
 
 data/
-  top10k_rockyou.txt       # Top 10,000 rockyou.txt passwords for testing
+  rockyou_subset_6.txt       # rockyou.txt passwords for testing
 .gitignore
 requirements.txt
 README.md
