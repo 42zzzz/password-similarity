@@ -19,7 +19,22 @@ Detecting password similarities using **Bloom filters** and **cryptographic hash
 ```bash
 git clone https://github.com/42zzzz/password-similarity.git
 cd password-similarity
-python integration/checker.py data/banned_passwords.txt
+```
+
+## How to Run
+
+No external dependencies are required — the project uses only the Python standard library.
+
+**Interactive password checker:**
+
+```bash
+python -m bloom.cli
+```
+
+**Run tests:**
+
+```bash
+python -m unittest discover tests
 ```
 
 ## Structure
