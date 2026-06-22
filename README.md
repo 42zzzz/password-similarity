@@ -9,9 +9,9 @@ Detecting password similarities using **Bloom filters** and **cryptographic hash
 | # Memeber  | Role                              | Branch        |
 | ---------- | --------------------------------- | ------------- |
 | 1, Zaidan  | Bloom Filter Core                 | `bloom`       |
-| 2, Hafsa   | Hash Functions                    | `hash`        |
+| 2, Roshni   | Hash Functions                    | `hash`        |
 | 3, Sakina  | Bigram Similarity Engine          | `bigram`      |
-| 4, Roshni  | Threshold Justification & Testing | `threshold`   |
+| 4, Hafsa  | Threshold Justification & Testing | `threshold`   |
 | 5, Manisha | Integration & Report              | `integration` |
 
 ## Setup
