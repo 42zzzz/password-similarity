@@ -26,10 +26,10 @@ def get_hash_pair(bigram: str) -> tuple:
     return sha256_hash(bigram), md5_hash(bigram)
 
 
-def create_hashes(num):
+def create_hashes(num: int, L: int = 1000):
     def make(i):
         def h(item):
-            return sha256_hash(item) + i * md5_hash(item)
+            return (sha256_hash(item) + i * md5_hash(item)) % L
         return h
     return [make(i) for i in range(num)]
 
