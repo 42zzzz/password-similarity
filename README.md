@@ -6,7 +6,7 @@ Detecting password similarities using **Bloom filters** and **cryptographic hash
 
 ## Team
 
-| # Memeber  | Role                              | Branch        |
+| # Member  | Role                              | Branch        |
 | ---------- | --------------------------------- | ------------- |
 | 1, Zaidan  | Bloom Filter Core                 | `bloom`       |
 | 2, Roshni   | Hash Functions                    | `hash`        |
@@ -25,7 +25,13 @@ cd password-similarity
 
 No external dependencies are required — the project uses only the Python standard library.
 
-**Interactive password checker:**
+**Launch the application:**
+
+```bash
+python main.py
+```
+
+Or:
 
 ```bash
 python -m bloom.cli
@@ -42,11 +48,14 @@ python -m unittest discover tests
 ```
 bloom/
   __init__.py
-  bloom_filter.py          # BloomFilter class (m-bit array, insert, check, FP rate)
+  bloom_beta.py            # β(p) Bloom filter (bi-gram atoms, OR combination, precompute)
+  cli.py                   # CLI with password input, length validation, JUSTIF table
+
+main.py                    # Root entry point (python main.py)
 
 hash/
   __init__.py
-  hash_functions.py        # SHA-256, MurmurHash, hash function factory
+  hash_functions.py        # SHA-256, MD5, hash function factory (double hashing)
 
 bigram/
   __init__.py
@@ -61,7 +70,7 @@ integration/
   checker.py               # CLI/REPL wiring everything together
 
 data/
-  rockyou_subset_6.txt       # rockyou.txt passwords for testing
+  rockyou_subset_6.txt       # 250 common passwords (testing data, length 8-10)
 .gitignore
 requirements.txt
 README.md
