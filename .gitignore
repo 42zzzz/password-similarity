@@ -10,7 +10,3 @@ build/
 .DS_Store
 Thumbs.db
 
-# use rockyou_subset_6.txt
-
-data/rockyou_subset_6.txt
-bloom/rockyou_subset_6.txt
