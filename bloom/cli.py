@@ -1,7 +1,9 @@
 import os
 import sys
 
-from bloom.bloom_beta import compute_beta, precompute_dataset, filter_to_string, L
+from bigram.beta import compute_beta, build_beta_dictionary
+from bigram.similarity import jaccard, dice, cosine
+from bloom.bloom_beta import L
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'rockyou_subset_6.txt')
 
@@ -21,7 +23,7 @@ def main():
         sys.exit(1)
 
     print('Loading dataset and precomputing beta filters...')
-    dataset = precompute_dataset(data_path)
+    dataset = build_beta_dictionary(data_path)
     print(f'Loaded {len(dataset)} passwords (length 8-10).')
     print()
 
@@ -54,7 +56,10 @@ def main():
 
         row_count = 0
         for pw, beta_pw in dataset.items():
-            print(f'{pw:<15} {"---":<10} {"---":<10} {"---":<10}')
+            j = jaccard(beta_user, beta_pw)
+            d = dice(beta_user, beta_pw)
+            c = cosine(beta_user, beta_pw)
+            print(f'{pw:<15} {j:<10.4f} {d:<10.4f} {c:<10.4f}')
             row_count += 1
             if row_count >= 10:
                 remaining = len(dataset) - 10
@@ -64,15 +69,8 @@ def main():
                 break
 
         print()
-        print('Note: Jaccard, Dice, and Cosine values will be filled by Member 3')
-        print('      (bigram/similarity.py). Accept/reject logic will be completed')
-        print('      by Members 4 and 5 (threshold evaluation and integration).')
-        print()
-
-        decision = 'PENDING'
-        print(f'Decision for "{user_pw}": {decision}')
-        print('(Accept/reject justification requires similarity metrics from Member 3')
-        print(' and threshold analysis from Member 4.)')
+        print('Accept/reject decision pending threshold analysis from Member 4')
+        print('(threshold/evaluate.py).')
         print()
 
     print('Goodbye.')

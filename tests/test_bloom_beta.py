@@ -1,8 +1,6 @@
 import unittest
-import os
-import tempfile
 
-from bloom.bloom_beta import L, K, compute_atom, compute_beta, precompute_dataset, filter_to_string
+from bloom.bloom_beta import L, K, compute_atom, or_atoms
 
 
 class TestComputeAtom(unittest.TestCase):
@@ -35,122 +33,36 @@ class TestComputeAtom(unittest.TestCase):
         self.assertNotEqual(a1, a2)
 
 
-class TestComputeBeta(unittest.TestCase):
+class TestOrAtoms(unittest.TestCase):
 
-    def test_beta_length(self):
-        beta = compute_beta("MUELLER")
-        self.assertEqual(len(beta), L)
+    def test_or_single_atom(self):
+        atom = compute_atom("MU")
+        result = or_atoms([atom])
+        self.assertEqual(result, atom)
 
-    def test_beta_binary(self):
-        beta = compute_beta("MUELLER")
-        for bit in beta:
-            self.assertIn(bit, (0, 1))
+    def test_or_two_atoms_combines_ones(self):
+        a1 = compute_atom("MU")
+        a2 = compute_atom("UE")
+        result = or_atoms([a1, a2])
+        for i in range(L):
+            expected = 1 if a1[i] == 1 or a2[i] == 1 else 0
+            self.assertEqual(result[i], expected)
 
-    def test_beta_has_ones(self):
-        beta = compute_beta("MUELLER")
-        self.assertGreater(sum(beta), 0)
+    def test_or_all_zeros(self):
+        zeros = [[0] * L for _ in range(5)]
+        result = or_atoms(zeros)
+        self.assertEqual(result, [0] * L)
 
-    def test_beta_deterministic(self):
-        b1 = compute_beta("MUELLER")
-        b2 = compute_beta("MUELLER")
-        self.assertEqual(b1, b2)
+    def test_or_empty_list(self):
+        result = or_atoms([])
+        self.assertEqual(result, [0] * L)
 
-    def test_beta_different_passwords_differ(self):
-        b1 = compute_beta("password")
-        b2 = compute_beta("password1")
-        self.assertNotEqual(b1, b2)
-
-    def test_beta_similar_passwords_share_bits(self):
-        b1 = compute_beta("password")
-        b2 = compute_beta("passw0rd")
-        overlap = sum(1 for i in range(L) if b1[i] == 1 and b2[i] == 1)
-        self.assertGreater(overlap, 0)
-
-    def test_beta_padded_with_spaces(self):
-        beta = compute_beta("MUELLER")
-        self.assertEqual(len(beta), L)
-
-    def test_beta_min_length_password(self):
-        beta = compute_beta("12345678")
-        self.assertEqual(len(beta), L)
-        self.assertGreater(sum(beta), 0)
-
-    def test_beta_max_length_password(self):
-        beta = compute_beta("1234567890")
-        self.assertEqual(len(beta), L)
-        self.assertGreater(sum(beta), 0)
-
-    def test_beta_empty_string_returns_valid(self):
-        beta = compute_beta("")
-        self.assertEqual(len(beta), L)
-        for bit in beta:
-            self.assertIn(bit, (0, 1))
-
-
-class TestPrecomputeDataset(unittest.TestCase):
-
-    def setUp(self):
-        self.tmpfile = os.path.join(tempfile.gettempdir(), '_test_passwords.txt')
-        with open(self.tmpfile, 'w', encoding='utf-8') as f:
-            f.write("123456\n")
-            f.write("password\n")
-            f.write("123456789\n")
-            f.write("tiny\n")
-            f.write("12345678\n")
-
-    def tearDown(self):
-        if os.path.exists(self.tmpfile):
-            os.remove(self.tmpfile)
-
-    def test_precompute_returns_dict(self):
-        result = precompute_dataset(self.tmpfile)
-        self.assertIsInstance(result, dict)
-
-    def test_precompute_filters_by_length(self):
-        result = precompute_dataset(self.tmpfile)
-        self.assertIn("password", result)
-        self.assertIn("123456789", result)
-        self.assertIn("12345678", result)
-        self.assertNotIn("123456", result)
-        self.assertNotIn("tiny", result)
-
-    def test_precompute_values_are_beta_lists(self):
-        result = precompute_dataset(self.tmpfile)
-        for pw, beta in result.items():
-            self.assertEqual(len(beta), L)
-            for bit in beta:
-                self.assertIn(bit, (0, 1))
-
-    def test_precompute_deterministic(self):
-        r1 = precompute_dataset(self.tmpfile)
-        r2 = precompute_dataset(self.tmpfile)
-        for pw in r1:
-            self.assertEqual(r1[pw], r2[pw])
-
-
-class TestFilterToString(unittest.TestCase):
-
-    def test_filter_to_string_length(self):
-        beta = compute_beta("MUELLER")
-        s = filter_to_string(beta)
-        self.assertEqual(len(s), L)
-        self.assertIsInstance(s, str)
-
-    def test_filter_to_string_contents(self):
-        beta = [0, 1, 0, 1, 1] + [0] * (L - 5)
-        s = filter_to_string(beta)
-        self.assertEqual(s[:5], "01011")
-        self.assertEqual(s[5:], "0" * (L - 5))
-
-    def test_filter_to_string_all_zeros(self):
-        beta = [0] * L
-        s = filter_to_string(beta)
-        self.assertEqual(s, "0" * L)
-
-    def test_filter_to_string_all_ones(self):
-        beta = [1] * L
-        s = filter_to_string(beta)
-        self.assertEqual(s, "1" * L)
+    def test_or_deterministic(self):
+        a1 = compute_atom("MU")
+        a2 = compute_atom("UE")
+        r1 = or_atoms([a1, a2])
+        r2 = or_atoms([a1, a2])
+        self.assertEqual(r1, r2)
 
 
 if __name__ == '__main__':

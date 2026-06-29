@@ -1,1 +1,1 @@
-from .beta import compute_beta, build_beta_dictionary, L, K
+from .beta import compute_beta, build_beta_dictionary

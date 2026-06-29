@@ -1,34 +1,22 @@
-from hash.hash_functions import create_hashes
+from hash.hash_functions import sha256_hash, md5_hash
 
 L = 1000
 K = 20
 
-_hashes = create_hashes(K, L)
-
 
 def compute_atom(bigram: str) -> list[int]:
+    f = sha256_hash(bigram)
+    g = md5_hash(bigram)
     atom = [0] * L
-    for hf in _hashes:
-        atom[hf(bigram)] = 1
+    for i in range(K):
+        atom[(f + i * g) % L] = 1
     return atom
 
 
-def compute_beta(password: str) -> list[int]:
-    padded = ' ' + password + ' '
-    bigrams = [padded[i:i+2] for i in range(len(padded) - 1)]
-    beta = [0] * L
-    for bg in bigrams:
-        atom = compute_atom(bg)
+def or_atoms(atoms: list[list[int]]) -> list[int]:
+    result = [0] * L
+    for atom in atoms:
         for i in range(L):
             if atom[i]:
-                beta[i] = 1
-    return beta
-
-
-def precompute_dataset(filepath: str) -> dict:
-    from hash.hash_functions import load_passwords
-    return {pw: compute_beta(pw) for pw in load_passwords(filepath)}
-
-
-def filter_to_string(beta: list) -> str:
-    return ''.join(str(b) for b in beta)
+                result[i] = 1
+    return result
