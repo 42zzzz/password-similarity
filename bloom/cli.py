@@ -54,19 +54,23 @@ def main():
         print(f'{"Password":<15} {"Jaccard":<10} {"Dice":<10} {"Cosine":<10}')
         print('-' * 45)
 
-        row_count = 0
+        scored = []
         for pw, beta_pw in dataset.items():
             j = jaccard(beta_user, beta_pw)
             d = dice(beta_user, beta_pw)
             c = cosine(beta_user, beta_pw)
-            print(f'{pw:<15} {j:<10.4f} {d:<10.4f} {c:<10.4f}')
-            row_count += 1
-            if row_count >= 10:
-                remaining = len(dataset) - 10
+            scored.append((j, d, c, pw))
+
+        scored.sort(key=lambda x: x[1], reverse=True)
+
+        for i, (j, d, c, pw) in enumerate(scored):
+            if i >= 10:
+                remaining = len(scored) - 10
                 if remaining > 0:
                     print(f'{"...":<15} {"...":<10} {"...":<10} {"...":<10}')
                     print(f'(Table truncated. {remaining} more passwords not shown.)')
                 break
+            print(f'{pw:<15} {j:<10.4f} {d:<10.4f} {c:<10.4f}')
 
         print()
         print('Accept/reject decision pending threshold analysis from Member 4')
