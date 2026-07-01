@@ -1,16 +1,15 @@
-# Default threshold: first zero-error value found by threshold/justify.py
+# Derived from threshold/justify.py: first zero-error threshold (FAR=0, FRR=0)
+# using 60 similar + 60 dissimilar test passwords against the full dataset.
+# Run: python -m threshold.justify
 DEFAULT_THRESHOLD = 0.26
 
 
 def evaluate(scored_rows, threshold=DEFAULT_THRESHOLD):
-    # Reuse precomputed JUSTIF rows: (jaccard, dice, cosine, password)
     if not scored_rows:
-        return 'ACCEPT', 0.0, None
+        return 'ACCEPT', 0.0, 0.0, 0.0, None
 
-    # Jaccard is the metric used for the accept/reject threshold
     closest = max(scored_rows, key=lambda row: row[0])
-    max_score = closest[0]
-    closest_password = closest[-1]
+    j, d, c, pw = closest
 
-    decision = 'REJECT' if max_score >= threshold else 'ACCEPT'
-    return decision, max_score, closest_password
+    decision = 'REJECT' if j >= threshold else 'ACCEPT'
+    return decision, j, d, c, pw

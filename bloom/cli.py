@@ -3,6 +3,7 @@ import sys
 
 from bigram.beta import compute_beta, build_beta_dictionary
 from bigram.similarity import jaccard, dice, cosine
+from threshold.evaluate import evaluate, DEFAULT_THRESHOLD
 from bloom.bloom_beta import L
 
 DATA_FILE = os.path.join(os.path.dirname(__file__), '..', 'data', 'rockyou_subset_6.txt')
@@ -72,12 +73,14 @@ def main():
                 break
             print(f'{pw:<15} {j:<10.4f} {d:<10.4f} {c:<10.4f}')
 
-        print()
-        print('Accept/reject decision pending threshold analysis from Member 4')
-        print('(threshold/evaluate.py).')
+        decision, j, d, c, closest_pw = evaluate(scored)
+        print(f'Decision for "{user_pw}": {decision}')
+        if closest_pw:
+            print(f'Closest match: "{closest_pw}" (Jaccard={j:.4f}, Dice={d:.4f}, Cosine={c:.4f})')
+            print(f'Threshold: {DEFAULT_THRESHOLD} (derived from FAR/FRR analysis)')
         print()
 
-    print('Goodbye.')
+    print('Quitting...')
 
 
 if __name__ == '__main__':
