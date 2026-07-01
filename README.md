@@ -63,7 +63,8 @@ bigram/
 
 threshold/
   __init__.py
-  evaluate.py              # FAR/FRR calculation, optimal threshold search
+  evaluate.py              # Runtime threshold accept/reject decision
+  justify.py               # FAR/FRR calculation, optimal threshold search
 
 integration/
   __init__.py
